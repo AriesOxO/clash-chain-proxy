@@ -118,6 +118,31 @@ A naive `DOMAIN-SUFFIX,bing.com,proxy` would route all of Bing through the proxy
 
 Use the same pattern for Gemini, Notion AI, etc.
 
+## How to temporarily disable
+
+Four levels of "off", from soft to hard:
+
+| Level | Action | Effect |
+|---|---|---|
+| **L1** Switch exit | Proxies page → set `🚀 Final exit selector` to `✈️ Airport relay pool` | Bypass the static IP, use the airport pool directly |
+| **L2** Disable script | Edit `Script.js` line 5 `const CHAIN_PROXY_ENABLED = false`, then reload | Script returns the original config; back to the airport's native groups |
+| **L3** Stop the proxy | Toggle off "System Proxy" in Clash Verge | All apps go direct; Clash itself keeps running |
+| **L4** Quit Clash | Tray icon → Quit | Fully stopped |
+
+L2 is the script's built-in kill switch:
+
+```javascript
+function main(config) {
+  // Set to false to temporarily disable the entire chain proxy
+  const CHAIN_PROXY_ENABLED = true;
+
+  if (!CHAIN_PROXY_ENABLED) {
+    return config;
+  }
+  // ...
+}
+```
+
 ## Known limitations
 
 | Limitation | Impact | Mitigation |

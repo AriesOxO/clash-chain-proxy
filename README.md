@@ -118,6 +118,31 @@ graph LR
 
 按相同模式可以加入其他服务（Gemini、Notion AI 等）。
 
+## 如何临时关闭
+
+按"关掉"程度从轻到重，有 4 个层级：
+
+| 层级 | 操作 | 效果 |
+|---|---|---|
+| **L1** 切换出口 | Proxies 页面 → `🚀 最终出口选择` 切到 `✈️ 机场中转池` | 绕开静态 IP，直接走机场代理 |
+| **L2** 关闭脚本 | 编辑 `Script.js` 第 5 行 `const CHAIN_PROXY_ENABLED = false` 后重载配置 | 脚本直接返回原始配置，回到机场原生分组 |
+| **L3** 关闭代理 | Clash Verge 主界面关闭「系统代理」开关 | 所有应用直连，Clash 进程仍在 |
+| **L4** 退出 Clash | 托盘 → 退出 | 完全停止 |
+
+L2 是脚本内置的一键开关：
+
+```javascript
+function main(config) {
+  // 改为 false 即可临时禁用整个链式代理
+  const CHAIN_PROXY_ENABLED = true;
+
+  if (!CHAIN_PROXY_ENABLED) {
+    return config;
+  }
+  // ...
+}
+```
+
 ## 已知限制
 
 | 限制 | 影响 | 缓解方案 |

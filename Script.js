@@ -11,6 +11,16 @@
  * 使用前请替换 staticProxyConfig 中的 YOUR_* 占位符
  */
 function main(config) {
+  // ================= 0. 一键总开关 =================
+  // 设为 false 可临时禁用整个链式代理脚本
+  // 禁用后脚本直接返回机场原始配置, 等同于在 UI 里关闭"全局扩展脚本"
+  // 使用方式: 改为 false → 在 Clash Verge 中点击"重载配置"
+  const CHAIN_PROXY_ENABLED = true;
+
+  if (!CHAIN_PROXY_ENABLED) {
+    return config;
+  }
+
   try {
     // ================= 1. 核心配置区域 =================
     // 替换为你自己的静态 IP 服务器信息
