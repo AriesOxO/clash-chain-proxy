@@ -1,0 +1,24 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# 编辑器
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# 真实配置 (千万不要把改好的脚本提交到这里!)
+Script.local.js
+*.local.js
+config.local.yaml
+*.local.yaml
+
+# 备份目录
+backups/
+
+# 日志
+*.log
+logs/

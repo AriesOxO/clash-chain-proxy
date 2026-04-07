@@ -1,0 +1,99 @@
+# 示例订阅配置 (虚构数据, 仅用于演示脚本的处理流程)
+# 实际使用时请用真实的机场订阅替换, 而不是直接用本文件
+#
+# 本文件展示了一个最小可用的机场订阅样例:
+# - 4 个虚构机场节点 (HK / JP / US)
+# - 1 个无效"信息节点" (server: 0.0.0.0), 用于测试脚本的过滤逻辑
+# - 简单的代理分组
+# - 几条示例规则
+#
+# 把本文件配合 Script.js 加载到 Clash Verge 后, 脚本会:
+# 1. 自动添加 🔒 静态IP (出口) 节点 (来自 Script.js 的 staticProxyConfig)
+# 2. 自动构建 🚀 最终出口选择 / ✈️ 机场中转池 两个分组
+# 3. 过滤掉 server 为 0.0.0.0 的"无效节点示例"
+# 4. 重写规则, 让所有非 DIRECT/REJECT 的规则指向 🚀 最终出口选择
+
+mixed-port: 7897
+allow-lan: false
+mode: rule
+log-level: info
+ipv6: true
+
+dns:
+  enable: true
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  nameserver:
+    - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
+  fallback:
+    - https://dns.cloudflare.com/dns-query
+    - tls://8.8.4.4:853
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+
+proxies:
+  # ↓ 一个无效"信息节点", 用于测试脚本的 0.0.0.0 过滤
+  - name: "无效节点示例 (会被脚本过滤)"
+    type: trojan
+    server: 0.0.0.0
+    port: 443
+    password: example-password-not-real
+    sni: example.com
+    skip-cert-verify: true
+
+  # ↓ 虚构的机场节点
+  - name: "🇭🇰 香港 示例-01"
+    type: vless
+    server: hk-example-01.fictional-airport.example.com
+    port: 443
+    uuid: 00000000-0000-0000-0000-000000000001
+    flow: xtls-rprx-vision
+    tls: true
+    skip-cert-verify: true
+    servername: hk-example-01.fictional-airport.example.com
+
+  - name: "🇯🇵 日本 示例-01"
+    type: vless
+    server: jp-example-01.fictional-airport.example.com
+    port: 443
+    uuid: 00000000-0000-0000-0000-000000000002
+    flow: xtls-rprx-vision
+    tls: true
+    skip-cert-verify: true
+    servername: jp-example-01.fictional-airport.example.com
+
+  - name: "🇯🇵 日本 示例-02"
+    type: trojan
+    server: jp-example-02.fictional-airport.example.com
+    port: 443
+    password: example-trojan-password
+    sni: jp-example-02.fictional-airport.example.com
+    skip-cert-verify: true
+
+  - name: "🇺🇸 美国 示例-01"
+    type: trojan
+    server: us-example-01.fictional-airport.example.com
+    port: 443
+    password: example-trojan-password
+    sni: us-example-01.fictional-airport.example.com
+    skip-cert-verify: true
+
+# 注意: 以下分组会被 Script.js 完全覆盖
+# 这里保留是为了展示订阅源原本的样子
+proxy-groups:
+  - name: "节点选择"
+    type: select
+    proxies:
+      - "🇭🇰 香港 示例-01"
+      - "🇯🇵 日本 示例-01"
+      - "🇯🇵 日本 示例-02"
+      - "🇺🇸 美国 示例-01"
+
+# 示例规则: Script.js 会重写所有非 DIRECT/REJECT 的规则
+rules:
+  - DOMAIN-SUFFIX,example.com,节点选择
+  - DOMAIN-SUFFIX,baidu.com,DIRECT
+  - GEOIP,CN,DIRECT
+  - MATCH,节点选择
